@@ -4,7 +4,7 @@ setup(
     name='ucanSystec',
     version='b0',
     packages=[''],
-    url='',
+    url='https://github.com/SMFSW/python-ucanSystec',
     license='MIT',
     author='SMFSW',
     author_email='xgoinxpostalx@gmail.com',
