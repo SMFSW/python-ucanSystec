@@ -7,6 +7,6 @@ setup(
     url='https://github.com/SMFSW/python-ucanSystec',
     license='MIT',
     author='SMFSW',
-    author_email='xgoinxpostalx@gmail.com',
+    author_email='xgarmanboziax@gmail.com',
     description='Systec usb/can dll bindings'
 )
