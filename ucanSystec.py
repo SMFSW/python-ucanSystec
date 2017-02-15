@@ -2,7 +2,7 @@
 """
 ucanSystec.py
 Author: SMFSW
-Copyright (c) 2016 SMFSW
+Copyright (c) 2016-2017 SMFSW
 
 The MIT License (MIT)
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -260,8 +260,8 @@ def can_err_code_wrapper():
             try:
                 ret = fct(*args, **kwargs)
             except WindowsError, e:
-                print "Raised exception: ", repr(e)
-                print "DLL is most probably missing"
+                print("Raised exception: ", repr(e))
+                print("DLL is most probably missing")
             return ret
         return catch
     return wrapper
@@ -273,7 +273,7 @@ class ucanSystec(object):
     def __init__(self):
         """ instance init """
         self.btestvar = c_int()
-        print "=================== Start Systec Init ==================="
+        print("=================== Start Systec Init ===================")
 
         # Get platform
         platform = os.environ['PROCESSOR_ARCHITECTURE']
@@ -281,14 +281,14 @@ class ucanSystec(object):
             platform = os.environ["PROCESSOR_ARCHITEW6432"]
         except KeyError:
             pass    # key not found, pass
-        print "* Platform is : {}".format(platform)
+        print("* Platform is : {}".format(platform))
 
         # trick for not so clean installs of the driver on 64b machines
         if os.path.isfile("C:\\Windows\\System32\\Usbcan64.dll"):
             self.dll = WinDLL("Usbcan64.dll")
         else:
             self.dll = WinDLL("Usbcan32.dll")
-        print "** Running DLL : {}".format(self.dll._name)  # shouldn't call _name directly
+        print("** Running DLL : {}".format(self.dll._name))     # shouldn't call _name directly
 
         self._ucanhandle = c_byte()
         self._ucanret = retSystec['USBCAN_ERRCMD_NOTINIT']
@@ -317,7 +317,7 @@ class ucanSystec(object):
         self.params.m_dwAMR = c_ulong(0xFFFFFFFF)
         self.params.m_dwACR = c_ulong(0)
 
-        print "==================== H/W Systec Init ===================="
+        print("==================== H/W Systec Init ====================")
         # Callback for UcanInitHardware() not implemented yet.
         # This can be done. See ctypes chapter 16.15.1.17. Callback functions
         # TODO: http:#docs.python.org/release/2.5/lib/ctypes-callback-functions.html
@@ -327,12 +327,12 @@ class ucanSystec(object):
             self.can_close()
             return self
         self.can_get_hw_infos()
-        print "============== Done initialing Systec unit. ============="
+        print("============== Done initialing Systec unit. =============")
         return self
 
     def can_close(self):
         """ release systec module communication """
-        print "=== Closing communication with systec USB-CAN module. ==="
+        print("=== Closing communication with systec USB-CAN module. ===")
         self.can_deinit_can()
         self.can_deinit_hw()
         return self._ucanret
@@ -375,8 +375,8 @@ class ucanSystec(object):
         self._ucanret = self.dll.UcanGetCanErrorCounterEx(self._ucanhandle, chan,
                                                           byref(self.tx_err_cnt), byref(self.rx_err_cnt))
         if self._ucanret > 0:
-            print "!FAIL! UcanGetCanErrorCounterEx = {} ({})".format(self._get_errcode(self._ucanret),
-                                                                     hex(self._ucanret))
+            print("!FAIL! UcanGetCanErrorCounterEx = {} ({})".format(self._get_errcode(self._ucanret),
+                                                                     hex(self._ucanret)))
         return self
 
     @can_err_code_wrapper()
@@ -388,7 +388,7 @@ class ucanSystec(object):
                                                    c_long(5), byref(self.msg_pending))
         if self._ucanret > 0:
             if ucanVerbose is True:
-                print "!FAIL! UcanGetMsgPending = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret))
+                print("!FAIL! UcanGetMsgPending = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
             self.msg_pending = c_ubyte(0)
         return self.msg_pending
 
@@ -400,8 +400,8 @@ class ucanSystec(object):
         self._ucanret = self.dll.UcanGetMsgCountInfoEx(self._ucanhandle, chan, byref(self.msgcount))
         if self._ucanret > 0:
             if ucanVerbose is True:
-                print "!FAIL! UcanGetMsgCountInfoEx = {} ({})".format(self._get_errcode(self._ucanret),
-                                                                      hex(self._ucanret))
+                print("!FAIL! UcanGetMsgCountInfoEx = {} ({})".format(self._get_errcode(self._ucanret),
+                                                                      hex(self._ucanret)))
             self.msgcount = tUcanMsgCountInfo(0, 0)
         return self.msgcount
 
@@ -414,8 +414,8 @@ class ucanSystec(object):
         self._ucanret = self.dll.UcanReadCanMsgEx(self._ucanhandle, byref(c_long(chan)), byref(self.rxcan), nb_msg)
         if self._ucanret > 0:
             if ucanVerbose is True:
-                print "!FAIL! UcanReadCanMsgEx = {} ({})".format(self._get_errcode(self._ucanret),
-                                                                 hex(self._ucanret))
+                print("!FAIL! UcanReadCanMsgEx = {} ({})".format(self._get_errcode(self._ucanret),
+                                                                 hex(self._ucanret)))
         return self._ucanret
 
     @can_err_code_wrapper()
@@ -430,8 +430,8 @@ class ucanSystec(object):
         self._ucanret = self.dll.UcanWriteCanMsgEx(self._ucanhandle, chan, byref(self.txcan), None)
         if self._ucanret > 0:
             if ucanVerbose is True:
-                print "!FAIL! UcanWriteCanMsgEx = {} ({})".format(self._get_errcode(self._ucanret),
-                                                                  hex(self._ucanret))
+                print("!FAIL! UcanWriteCanMsgEx = {} ({})".format(self._get_errcode(self._ucanret),
+                                                                  hex(self._ucanret)))
         return self._ucanret
 
     @can_err_code_wrapper()
@@ -442,8 +442,8 @@ class ucanSystec(object):
         :return: return error code """
         self._ucanret = self.dll.UcanResetCanEx(self._ucanhandle, chan, c_long(flags))
         if self._ucanret > 0:
-            print "!FAIL! UcanResetCanEx = {} ({})".format(self._get_errcode(self._ucanret),
-                                                           hex(self._ucanret))
+            print("!FAIL! UcanResetCanEx = {} ({})".format(self._get_errcode(self._ucanret),
+                                                           hex(self._ucanret)))
         return self._ucanret
 
     @can_err_code_wrapper()
@@ -454,8 +454,8 @@ class ucanSystec(object):
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanInitHardware(byref(self._ucanhandle), nbr, callback)
         if self._ucanret > 0:
-            print "!FAIL! UcanInitHardware = {} ({})".format(self._get_errcode(self._ucanret),
-                                                             hex(self._ucanret))
+            print("!FAIL! UcanInitHardware = {} ({})".format(self._get_errcode(self._ucanret),
+                                                             hex(self._ucanret)))
         return self
 
     @can_err_code_wrapper()
@@ -471,8 +471,8 @@ class ucanSystec(object):
                                                  self.params.dw_amr, self.params.dw_acr)
 
         if self._ucanret > 0:
-            print "!FAIL! UcanInitCanEx2 = {} ({})".format(self._get_errcode(self._ucanret),
-                                                           hex(self._ucanret))
+            print("!FAIL! UcanInitCanEx2 = {} ({})".format(self._get_errcode(self._ucanret),
+                                                           hex(self._ucanret)))
         return self
 
     @can_err_code_wrapper()
@@ -481,8 +481,8 @@ class ucanSystec(object):
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanDeinitHardware(self._ucanhandle)
         if self._ucanret > 0:
-            print"!FAIL! UcanDeinitHardware = {} ({})".format(self._get_errcode(self._ucanret),
-                                                              hex(self._ucanret))
+            print("!FAIL! UcanDeinitHardware = {} ({})".format(self._get_errcode(self._ucanret),
+                                                               hex(self._ucanret)))
         return self
 
     @can_err_code_wrapper()
@@ -491,8 +491,8 @@ class ucanSystec(object):
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanDeinitCan(self._ucanhandle)
         if self._ucanret > 0:
-            print "!FAIL! UcanDeinitCan = {} ({})".format(self._get_errcode(self._ucanret),
-                                                          hex(self._ucanret))
+            print("!FAIL! UcanDeinitCan = {} ({})".format(self._get_errcode(self._ucanret),
+                                                          hex(self._ucanret)))
         return self
 
     @can_err_code_wrapper()
@@ -502,8 +502,8 @@ class ucanSystec(object):
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanSetDeviceNr(self._ucanhandle, num)
         if self._ucanret > 0:
-            print "!FAIL! UcanSetDeviceNr = {} ({})".format(self._get_errcode(self._ucanret),
-                                                            hex(self._ucanret))
+            print("!FAIL! UcanSetDeviceNr = {} ({})".format(self._get_errcode(self._ucanret),
+                                                            hex(self._ucanret)))
         return self
 
     @can_err_code_wrapper()
@@ -516,8 +516,8 @@ class ucanSystec(object):
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanSetBaudrateEx(self._ucanhandle, chan, btrh, btrl, bdrate)
         if self._ucanret > 0:
-            print "!FAIL! UcanSetBaudrateEx = {} ({})".format(self._get_errcode(self._ucanret),
-                                                              hex(self._ucanret))
+            print("!FAIL! UcanSetBaudrateEx = {} ({})".format(self._get_errcode(self._ucanret),
+                                                              hex(self._ucanret)))
         return self
 
     @can_err_code_wrapper()
@@ -528,8 +528,8 @@ class ucanSystec(object):
         :return: error code returned by dll """
         self._ucanret = self.dll.UcanSetTxTimeout(self._ucanhandle, chan, timeout)
         if self._ucanret > 0:
-            print "!FAIL! UcanSetTxTimeout = {} ({})".format(self._get_errcode(self._ucanret),
-                                                             hex(self._ucanret))
+            print("!FAIL! UcanSetTxTimeout = {} ({})".format(self._get_errcode(self._ucanret),
+                                                             hex(self._ucanret)))
         return self._ucanret
 
     @can_err_code_wrapper()
@@ -540,8 +540,8 @@ class ucanSystec(object):
         self._ucanret = self.dll.UcanGetStatusEx(self._ucanhandle, chan, byref(self.status))
         if self._ucanret > 0:
             if ucanVerbose is True:
-                print "!FAIL! UcanGetStatusEx = {} ({})".format(self._get_errcode(self._ucanret),
-                                                                hex(self._ucanret))
+                print("!FAIL! UcanGetStatusEx = {} ({})".format(self._get_errcode(self._ucanret),
+                                                                hex(self._ucanret)))
         return self
 
     @can_err_code_wrapper()
@@ -552,8 +552,8 @@ class ucanSystec(object):
                                                         byref(self.chan0_infos), byref(self.chan1_infos))
         if self._ucanret > 0:
             if ucanVerbose is True:
-                print "!FAIL! UcanGetHardwareInfoEx2 = {} ({})".format(self._get_errcode(self._ucanret),
-                                                                       hex(self._ucanret))
+                print("!FAIL! UcanGetHardwareInfoEx2 = {} ({})".format(self._get_errcode(self._ucanret),
+                                                                       hex(self._ucanret)))
         return self._ucanret
 
     @staticmethod
@@ -584,7 +584,7 @@ if __name__ == "__main__":
     systec = ucanSystec()
 
     NR_POLLS = 30
-    print "NR_POLLS = ", NR_POLLS
+    print("NR_POLLS = {}".format(NR_POLLS))
 
     for i in range(NR_POLLS):
         systec.can_send_msg(msg)
