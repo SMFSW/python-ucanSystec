@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='ucanSystec',
-    version='b1',
+    version='0.1.0',
     packages=[''],
     url='https://github.com/SMFSW/python-ucanSystec',
     license='MIT',

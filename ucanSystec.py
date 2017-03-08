@@ -28,6 +28,11 @@ SOFTWARE.
 from ctypes import *
 import os
 import time
+from sys import version_info
+
+if version_info > (3,):
+    long = int  # workaround for python 3 as long and int are unified
+
 
 ucanVerbose = False     # set to True for verbose (may print lots of stuff)
 
@@ -259,8 +264,8 @@ def can_err_code_wrapper():
             ret = -1
             try:
                 ret = fct(*args, **kwargs)
-            except WindowsError, e:
-                print("Raised exception: ", repr(e))
+            except WindowsError as e:
+                print("Raised exception: {}".format(repr(e)))
                 print("DLL is most probably missing")
             return ret
         return catch
@@ -347,7 +352,7 @@ class ucanSystec(object):
     @staticmethod
     def _get_errcode(srch):
         """ get error code srch from usb-can module """
-        for name, err in retSystec.iteritems():
+        for name, err in retSystec.items():
             if err == srch:
                 return name
         return "UNKNOWN USB-CAN module error"
