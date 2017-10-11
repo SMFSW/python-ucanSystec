@@ -365,13 +365,12 @@ class ucanSystec(object):
         # This can be done. See ctypes chapter 16.15.1.17. Callback functions
         # TODO: http:#docs.python.org/release/2.5/lib/ctypes-callback-functions.html
         self.can_init_hw()
-        self.can_get_hw_infos()
-
-        # TODO: set default baudrate according to hw infos
+        self.can_get_hw_infos()     # get hw infos to determine baudrate value to apply
         self.can_set_speed()
         if self._ucanret != 0:
             self.can_close()
             return self
+        self.can_get_hw_infos()     # refresh hw infos to update channels config
         print("============== Done initialing Systec unit. =============")
         return self
 
