@@ -366,10 +366,11 @@ class ucanSystec(object):
         # TODO: http:#docs.python.org/release/2.5/lib/ctypes-callback-functions.html
         self.can_init_hw()
         self.can_get_hw_infos()     # get hw infos to determine baudrate value to apply
-        self.can_set_speed()
-        if self._ucanret != 0:
-            self.can_close()
+        if not self.is_initialised():
+            # self.can_close()
             return self
+        self.set_hw_gen()
+        self.can_set_speed()
         self.can_get_hw_infos()     # refresh hw infos to update channels config
         print("============== Done initialing Systec unit. =============")
         return self
@@ -382,12 +383,12 @@ class ucanSystec(object):
             self._hw_gen = gen
         else:
             pid = self.hw_infos.m_dwProductCode & 0xFFFF
-            if pid == USBCAN_PRODCODE_PID_ADVANCED_G4 or pid == USBCAN_PRODCODE_PID_BASIC_G4:
+            if pid in (USBCAN_PRODCODE_PID_ADVANCED_G4, USBCAN_PRODCODE_PID_BASIC_G4):
                 self._hw_gen = "G4"
             else:
                 self._hw_gen = "G3"
 
-        if self._hw_gen == "G1" or self._hw_gen == "G2":
+        if self._hw_gen in ("G1", "G2"):
             self._use_ex = False
         else:
             self._use_ex = True
@@ -405,11 +406,11 @@ class ucanSystec(object):
             self.params.m_dwBaudrate = c_uint(baudrateSystec[self._hw_gen].get(kbps))
         else:
             try:
-                if self._hw_gen == "G1" or self._hw_gen == "G2":
+                if self._hw_gen in ("G1", "G2"):
                     self.params.m_bBTR0 = c_ubyte(baudrateSystec["G2"].get(kbps) >> 8)
                     self.params.m_bBTR1 = c_ubyte(baudrateSystec["G2"].get(kbps) & 0xFF)
                     self.params.m_dwBaudrate = c_uint(USBCAN_BAUDEX_USE_BTR01)
-                elif self._hw_gen == "G3" or self._hw_gen == "G4":
+                elif self._hw_gen in ("G3", "G4"):
                     self.params.m_bBTR0 = c_ubyte(USBCAN_BAUD_USE_BTREX >> 8)
                     self.params.m_bBTR1 = c_ubyte(USBCAN_BAUD_USE_BTREX & 0xFF)
                     self.params.m_dwBaudrate = c_uint(baudrateSystec[self._hw_gen].get(kbps))
@@ -425,9 +426,10 @@ class ucanSystec(object):
     def can_close(self):
         """ release systec module communication """
         print("=== Closing communication with systec USB-CAN module. ===")
-        self.can_deinit_can()
-        self.can_deinit_hw()
-        return self._ucanret
+        if self.is_initialised():
+            self.can_deinit_can()
+            self.can_deinit_hw()
+            return self._ucanret
 
     def is_initialised(self):
         """ Returns True if usb/can module is initialized, False otherwise """
@@ -473,7 +475,7 @@ class ucanSystec(object):
         :param chan: module channel
         :return: error count on rx and tx """
         self._ucanret = self.dll.UcanGetCanErrorCounterEx(self._ucanhandle, chan, byref(self.tx_err_cnt), byref(self.rx_err_cnt))
-        if self._ucanret != 0:
+        if self._ucanret:
             print("!FAIL! UcanGetCanErrorCounterEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self
 
@@ -484,7 +486,7 @@ class ucanSystec(object):
         :return: rx pending messages count from usb-can module """
         self._ucanret = self.dll.UcanGetMsgPending(self._ucanhandle, chan,
                                                    c_long(5), byref(self.msg_pending))
-        if self._ucanret != 0:
+        if self._ucanret:
             if ucanVerbose is True:
                 print("!FAIL! UcanGetMsgPending = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
             self.msg_pending = c_ubyte(0)
@@ -496,7 +498,7 @@ class ucanSystec(object):
         :param chan: module channel
         :return: messages count from usb-can module """
         self._ucanret = self.dll.UcanGetMsgCountInfoEx(self._ucanhandle, chan, byref(self.msgcount))
-        if self._ucanret != 0:
+        if self._ucanret:
             if ucanVerbose is True:
                 print("!FAIL! UcanGetMsgCountInfoEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
             self.msgcount = tUcanMsgCountInfo(0, 0)
@@ -509,7 +511,7 @@ class ucanSystec(object):
         :param nb_msg: max number of messages to read at once (1 message at a time if set to 0)
         :return: return error code """
         self._ucanret = self.dll.UcanReadCanMsgEx(self._ucanhandle, byref(c_long(chan)), byref(self.rxcan), nb_msg)
-        if self._ucanret != 0:
+        if self._ucanret:
             if ucanVerbose is True:
                 print("!FAIL! UcanReadCanMsgEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self._ucanret
@@ -524,7 +526,7 @@ class ucanSystec(object):
         self.txcan.b_ff = c_ubyte(0x80)
         self.txcan.dw_time = c_ulong(long(time.time()))
         self._ucanret = self.dll.UcanWriteCanMsgEx(self._ucanhandle, chan, byref(self.txcan), None)
-        if self._ucanret != 0:
+        if self._ucanret:
             if ucanVerbose is True:
                 print("!FAIL! UcanWriteCanMsgEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self._ucanret
@@ -536,7 +538,7 @@ class ucanSystec(object):
         :param flags: custom module reset flags
         :return: return error code """
         self._ucanret = self.dll.UcanResetCanEx(self._ucanhandle, chan, c_long(flags))
-        if self._ucanret != 0:
+        if self._ucanret:
             print("!FAIL! UcanResetCanEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self._ucanret
 
@@ -547,7 +549,7 @@ class ucanSystec(object):
         :param callback: Callback function
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanInitHardware(byref(self._ucanhandle), nbr, callback)
-        if self._ucanret != 0:
+        if self._ucanret:
             print("!FAIL! UcanInitHardware = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self
 
@@ -562,7 +564,7 @@ class ucanSystec(object):
             self._ucanret = self.dll.UcanInitCan(self._ucanhandle, self.params.btr_h, self.params.btr_l,
                                                  self.params.dw_amr, self.params.dw_acr)
 
-        if self._ucanret != 0:
+        if self._ucanret:
             print("!FAIL! UcanInitCanEx2 = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self
 
@@ -571,7 +573,7 @@ class ucanSystec(object):
         """ Uninit module through dll
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanDeinitHardware(self._ucanhandle)
-        if self._ucanret != 0:
+        if self._ucanret:
             print("!FAIL! UcanDeinitHardware = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self
 
@@ -580,7 +582,7 @@ class ucanSystec(object):
         """ Uninit can through dll
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanDeinitCan(self._ucanhandle)
-        if self._ucanret != 0:
+        if self._ucanret:
             print("!FAIL! UcanDeinitCan = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self
 
@@ -590,7 +592,7 @@ class ucanSystec(object):
         :param num: new num to affect to the module (254-255 reserved)
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanSetDeviceNr(self._ucanhandle, num)
-        if self._ucanret != 0:
+        if self._ucanret:
             print("!FAIL! UcanSetDeviceNr = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self
 
@@ -603,7 +605,7 @@ class ucanSystec(object):
         :param chan: module channel
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanSetBaudrateEx(self._ucanhandle, chan, btrh, btrl, bdrate)
-        if self._ucanret != 0:
+        if self._ucanret:
             print("!FAIL! UcanSetBaudrateEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self
 
@@ -614,7 +616,7 @@ class ucanSystec(object):
         :param timeout: timeout value in ms
         :return: error code returned by dll """
         self._ucanret = self.dll.UcanSetTxTimeout(self._ucanhandle, chan, timeout)
-        if self._ucanret != 0:
+        if self._ucanret:
             print("!FAIL! UcanSetTxTimeout = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self._ucanret
 
@@ -624,10 +626,10 @@ class ucanSystec(object):
         :param chan: module channel
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanGetStatusEx(self._ucanhandle, chan, byref(self.status))
-        if self._ucanret != 0:
+        if self._ucanret:
             if ucanVerbose is True:
                 print("!FAIL! UcanGetStatusEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
-        if self.status != 0:
+        if self.status:
             print("!WARNING! UcanGetStatusEx = {} ({})".format(self._get_status(self.status), hex(self.status)))
         return self
 
@@ -637,11 +639,9 @@ class ucanSystec(object):
         :return: error code returned by dll """
         self._ucanret = self.dll.UcanGetHardwareInfoEx2(self._ucanhandle, byref(self.hw_infos),
                                                         byref(self.chan0_infos), byref(self.chan1_infos))
-        if self._ucanret != 0:
+        if self._ucanret:
             if ucanVerbose is True:
                 print("!FAIL! UcanGetHardwareInfoEx2 = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
-        else:
-            self.set_hw_gen()
 
         return self._ucanret
 
@@ -672,15 +672,16 @@ if __name__ == "__main__":
 
     systec = ucanSystec()
 
-    NR_POLLS = 30
-    print("NR_POLLS = {}".format(NR_POLLS))
+    if systec.is_initialised():
+        NR_POLLS = 30
+        print("NR_POLLS = {}".format(NR_POLLS))
 
-    for i in range(NR_POLLS):
-        systec.can_send_msg(msg)
-        time.sleep(0.4)
-        systec.can_get_msg()
+        for i in range(NR_POLLS):
+            systec.can_send_msg(msg)
+            time.sleep(0.4)
+            systec.can_get_msg()
 
-    systec.can_close()
+        systec.can_close()
 
 
 # -------------------------------------------------------------------
