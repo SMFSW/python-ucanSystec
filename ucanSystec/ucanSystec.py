@@ -2,7 +2,7 @@
 """
 ucanSystec.py
 Author: SMFSW
-Copyright (c) 2016-2017 SMFSW
+Copyright (c) 2016-2018 SMFSW
 
 The MIT License (MIT)
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,16 +23,13 @@ SOFTWARE.
 
 """
 
-from ctypes import *
 import os
 import time
 from sys import version_info
+from ctypes import *
 
 if version_info > (3,):
     long = int  # workaround for python 3 as long and int are unified
-
-
-ucanVerbose = False     # set to True for verbose (may print lots of stuff)
 
 
 USBCAN_PRODCODE_PID_GW001 = 0x1100          # order code GW-001 "USB-CANmodul" outdated
@@ -174,7 +171,7 @@ retSystec = {
 
 # noinspection PyPep8Naming
 class tCanMsgStruct(Structure):
-    """
+    """ Systec CAN message structure
     DWORD   m_dwID      # CAN identifier
     BYTE    m_bFF       # CAN frame format
     BYTE    m_bDLC      # CAN data length code
@@ -197,7 +194,7 @@ class tCanMsgStruct(Structure):
 
 # noinspection PyPep8Naming
 class tUcanHardwareInfoEx(Structure):
-    """
+    """ Systec Hardware infos structure
     DWORD       m_dwSize        # number of Bytes of this structure
     tUcanHandle m_UcanHandle    # USB-CAN-Handle
     BYTE        m_bDeviceNr     # device number
@@ -218,7 +215,7 @@ class tUcanHardwareInfoEx(Structure):
 
 # noinspection PyPep8Naming
 class tUcanInitCanParam(Structure):
-    """
+    """ Systec CAN module init parameters structure
     DWORD  m_dwSize         # Size of this structure in bytes
     BYTE   m_bMode          # CAN Transmission Mode (see table)
     BYTE   m_bBTR0          # Baud rate register 0 of the SJA1000
@@ -244,7 +241,7 @@ class tUcanInitCanParam(Structure):
 
 # noinspection PyPep8Naming
 class tUcanChannelInfo(Structure):
-    """
+    """ Systec CAN module channel infos structure
     DWORD   m_dwSize       # size of this structure in bytes
     BYTE    m_bMode        # CAN-mode (see tUcanMode)
     BYTE    m_bBTR0        # Bus Timing Register 0
@@ -270,7 +267,7 @@ class tUcanChannelInfo(Structure):
 
 # noinspection PyPep8Naming
 class tUcanMsgCountInfo(Structure):
-    """
+    """ Systec CAN module messages count structure
     WORD m_wSentMsgCount    # Counter for transmitted CAN-messages
     WORD m_wRecvdMsgCount   # Counter for received CAN-messages
     """
@@ -283,7 +280,7 @@ class tUcanMsgCountInfo(Structure):
 
 # noinspection PyPep8Naming
 class tStatusStruct(Structure):
-    """
+    """ Systec CAN module status structure
     WORD m_wCanStatus   # present CAN status
     WORD m_wUsbStatus   # present USB status
     """
@@ -317,9 +314,9 @@ def can_err_code_wrapper():
 # noinspection PyPep8Naming
 class ucanSystec(object):
     """ Systec usb-can module class """
-    def __init__(self):
+    def __init__(self, verbose=False):
         """ instance init """
-        self.btestvar = c_int()
+        self.verb = verbose
         print("=================== Start Systec Init ===================")
 
         # Get platform
@@ -341,8 +338,7 @@ class ucanSystec(object):
         self._ucanret = retSystec['USBCAN_ERRCMD_NOTINIT']
         self._use_ex = True
         self._hw_gen = ""
-        self.tx_err_cnt = c_long(0)
-        self.rx_err_cnt = c_long(0)
+        self.tx_err_cnt, self.rx_err_cnt = c_long(0), c_long(0)
         self.msg_pending = c_long(0)
 
         self.msgcount = tUcanMsgCountInfo(0, 0)
@@ -399,6 +395,7 @@ class ucanSystec(object):
     def can_set_speed(self, kbps=100000, dwBd=0):
         """ Set CAN bus speed
         :param kbps: speed to init
+        :param dwBd: Baud rate registers value (refer to section 2.3.4)
         :return: return error code """
         if dwBd:
             self.params.m_bBTR0 = c_ubyte(USBCAN_BAUD_USE_BTREX >> 8)
@@ -433,10 +430,7 @@ class ucanSystec(object):
 
     def is_initialised(self):
         """ Returns True if usb/can module is initialized, False otherwise """
-        if self._ucanhandle.value > -1:
-            return True
-        else:
-            return False
+        return True if self._ucanhandle.value > -1 else False
 
     @staticmethod
     def _get_errcode(srch):
@@ -487,9 +481,9 @@ class ucanSystec(object):
         self._ucanret = self.dll.UcanGetMsgPending(self._ucanhandle, chan,
                                                    c_long(5), byref(self.msg_pending))
         if self._ucanret:
-            if ucanVerbose is True:
-                print("!FAIL! UcanGetMsgPending = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
             self.msg_pending = c_ubyte(0)
+            if self.verb is True:
+                print("!FAIL! UcanGetMsgPending = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self.msg_pending
 
     @can_err_code_wrapper()
@@ -499,9 +493,9 @@ class ucanSystec(object):
         :return: messages count from usb-can module """
         self._ucanret = self.dll.UcanGetMsgCountInfoEx(self._ucanhandle, chan, byref(self.msgcount))
         if self._ucanret:
-            if ucanVerbose is True:
-                print("!FAIL! UcanGetMsgCountInfoEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
             self.msgcount = tUcanMsgCountInfo(0, 0)
+            if self.verb is True:
+                print("!FAIL! UcanGetMsgCountInfoEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self.msgcount
 
     @can_err_code_wrapper()
@@ -511,9 +505,8 @@ class ucanSystec(object):
         :param nb_msg: max number of messages to read at once (1 message at a time if set to 0)
         :return: return error code """
         self._ucanret = self.dll.UcanReadCanMsgEx(self._ucanhandle, byref(c_long(chan)), byref(self.rxcan), nb_msg)
-        if self._ucanret:
-            if ucanVerbose is True:
-                print("!FAIL! UcanReadCanMsgEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
+        if self._ucanret and self.verb is True:
+            print("!FAIL! UcanReadCanMsgEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self._ucanret
 
     @can_err_code_wrapper()
@@ -526,9 +519,8 @@ class ucanSystec(object):
         self.txcan.b_ff = c_ubyte(0x80)
         self.txcan.dw_time = c_ulong(long(time.time()))
         self._ucanret = self.dll.UcanWriteCanMsgEx(self._ucanhandle, chan, byref(self.txcan), None)
-        if self._ucanret:
-            if ucanVerbose is True:
-                print("!FAIL! UcanWriteCanMsgEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
+        if self._ucanret and self.verb is True:
+            print("!FAIL! UcanWriteCanMsgEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self._ucanret
 
     @can_err_code_wrapper()
@@ -563,7 +555,6 @@ class ucanSystec(object):
         else:
             self._ucanret = self.dll.UcanInitCan(self._ucanhandle, self.params.btr_h, self.params.btr_l,
                                                  self.params.dw_amr, self.params.dw_acr)
-
         if self._ucanret:
             print("!FAIL! UcanInitCanEx2 = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self
@@ -626,9 +617,8 @@ class ucanSystec(object):
         :param chan: module channel
         :return: ucanSystec object """
         self._ucanret = self.dll.UcanGetStatusEx(self._ucanhandle, chan, byref(self.status))
-        if self._ucanret:
-            if ucanVerbose is True:
-                print("!FAIL! UcanGetStatusEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
+        if self._ucanret and self.verb is True:
+            print("!FAIL! UcanGetStatusEx = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         if self.status:
             print("!WARNING! UcanGetStatusEx = {} ({})".format(self._get_status(self.status), hex(self.status)))
         return self
@@ -639,10 +629,8 @@ class ucanSystec(object):
         :return: error code returned by dll """
         self._ucanret = self.dll.UcanGetHardwareInfoEx2(self._ucanhandle, byref(self.hw_infos),
                                                         byref(self.chan0_infos), byref(self.chan1_infos))
-        if self._ucanret:
-            if ucanVerbose is True:
-                print("!FAIL! UcanGetHardwareInfoEx2 = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
-
+        if self._ucanret and self.verb is True:
+            print("!FAIL! UcanGetHardwareInfoEx2 = {} ({})".format(self._get_errcode(self._ucanret), hex(self._ucanret)))
         return self._ucanret
 
     @staticmethod
