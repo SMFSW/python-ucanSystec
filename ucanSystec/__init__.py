@@ -6,4 +6,4 @@ Author: SMFSW
 SystecUSBCAN package init
 """
 
-from ucanSystec.ucanSystec import *
+from .ucanSystec import *

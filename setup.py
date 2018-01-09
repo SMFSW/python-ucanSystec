@@ -6,7 +6,7 @@ Author: SMFSW
 SystecUSBCAN setup file
 """
 
-__version__ = "0.2.2"
+__version__ = "1.0.0"
 
 # from distutils.core import setup
 from setuptools import setup, find_packages
