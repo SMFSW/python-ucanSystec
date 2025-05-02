@@ -50,42 +50,42 @@ USBCAN_PRODCODE_PID_RESERVED4 = 0x1162
 baudrateSystec = {
     # --- bit rate values for 1st and 2nd generation (G1/G2) of USB-CANmodul ---
     "G2": {
-        10000:      0x672f,     # CAN baud rate 10kBit/s
-        20000:      0x532f,     # CAN baud rate 20kBit/s
-        25000:      0x1f34,     # CAN baud rate 25kBit/s
-        50000:      0x472f,     # CAN baud rate 50kBit/s
-        100000:     0x432f,     # CAN baud rate 100kBit/s
-        125000:     0x031c,     # CAN baud rate 125kBit/s
-        250000:     0x011c,     # CAN baud rate 250kBit/s
-        500000:     0x001c,     # CAN baud rate 500kBit/s
-        800000:     0x0016,     # CAN baud rate 800kBit/s
-        1000000:    0x0014,     # CAN baud rate 1MBit/s
+        10000: 0x672f,      # CAN baud rate 10kBit/s
+        20000: 0x532f,      # CAN baud rate 20kBit/s
+        25000: 0x1f34,      # CAN baud rate 25kBit/s
+        50000: 0x472f,      # CAN baud rate 50kBit/s
+        100000: 0x432f,     # CAN baud rate 100kBit/s
+        125000: 0x031c,     # CAN baud rate 125kBit/s
+        250000: 0x011c,     # CAN baud rate 250kBit/s
+        500000: 0x001c,     # CAN baud rate 500kBit/s
+        800000: 0x0016,     # CAN baud rate 800kBit/s
+        1000000: 0x0014,    # CAN baud rate 1MBit/s
     },
     # --- bit rate values for 3rd generation (G3) of USB-CANmodul ---
     "G3": {
-        10000:      0x80771772,     # 10kBit/s 85.00% (CLK = 1, see L-487 since version 15)
-        20000:      0x00771772,     # 20kBit/s 85.00%
-        25000:      0x805F0051,     # 25kBit/s
-        50000:      0x003B1741,     # 50kBit/s 87.50%
-        100000:     0x001D1741,     # 100kBit/s 87.50%
-        125000:     0x00170741,     # 125kBit/s 87.50%
-        250000:     0x000B0741,     # 250kBit/s 87.50%
-        500000:     0x00050741,     # 500kBit/s 87.50%
-        800000:     0x00030731,     # 800kBit/s 86.67%
-        1000000:    0x00020741,     # 1000kBit/s 87.50%
+        10000: 0x80771772,      # 10kBit/s 85.00% (CLK = 1, see L-487 since version 15)
+        20000: 0x00771772,      # 20kBit/s 85.00%
+        25000: 0x805F0051,      # 25kBit/s
+        50000: 0x003B1741,      # 50kBit/s 87.50%
+        125000: 0x00170741,     # 125kBit/s 87.50%
+        250000: 0x000B0741,     # 250kBit/s 87.50%
+        500000: 0x00050741,     # 500kBit/s 87.50%
+        800000: 0x00030731,     # 800kBit/s 86.67%
+        100000: 0x001D1741,     # 100kBit/s 87.50%
+        1000000: 0x00020741,    # 1000kBit/s 87.50%
     },
-    # --- bit rate values for 4th generation (G3) of USB-CANmodul ---
+    # --- bit rate values for 4th generation (G4) of USB-CANmodul ---
     "G4": {
-        10000:      0x412F0077,     # 10kBit/s 85.00%
-        20000:      0x412F003B,     # 20kBit/s 85.00%
-        25000:      0x4016005f,     # 25kBit/s
-        50000:      0x412F0017,     # 50kBit/s 85.00%
-        100000:     0x412F000B,     # 100kBit/s 85.00%
-        125000:     0x401C000B,     # 125kBit/s 87.50%
-        250000:     0x401C0005,     # 250kBit/s 87.50%
-        500000:     0x401C0002,     # 500kBit/s 87.50%
-        800000:     0x401B0001,     # 800kBit/s 86.67%
-        1000000:    0x40180001,     # 1000kBit/s 83.33
+        10000: 0x412F0077,      # 10kBit/s 85.00%
+        20000: 0x412F003B,      # 20kBit/s 85.00%
+        25000: 0x4016005f,      # 25kBit/s
+        50000: 0x412F0017,      # 50kBit/s 85.00%
+        100000: 0x412F000B,     # 100kBit/s 85.00%
+        125000: 0x401C000B,     # 125kBit/s 87.50%
+        250000: 0x401C0005,     # 250kBit/s 87.50%
+        500000: 0x401C0002,     # 500kBit/s 87.50%
+        800000: 0x401B0001,     # 800kBit/s 86.67%
+        1000000: 0x40180001,    # 1000kBit/s 83.33
     },
 }
 
@@ -101,71 +101,71 @@ USBCAN_BAUDEX_USE_BTR01 = 0x00000000
 # The Callback function is called, if certain events did occur.
 # These Defines specify the event.
 eventSystec = {
-    "USBCAN_EVENT_INITHW":      0,  # the USB-CANmodul has been initialized
-    "USBCAN_EVENT_INITCAN":     1,  # the CAN interface has been initialized
-    "USBCAN_EVENT_RECIEVE":     2,  # a new CAN message has been received (for compatibility reason)
-    "USBCAN_EVENT_RECEIVE":     2,  # a new CAN message has been received
-    "USBCAN_EVENT_STATUS":      3,  # the error state in the module has changed
-    "USBCAN_EVENT_DEINITCAN":   4,  # the CAN interface has been deinitialized (UcanDeinitCan() was called)
-    "USBCAN_EVENT_DEINITHW":    5,  # the USB-CANmodul has been deinitialized (UcanDeinitHardware() was called)
-    "USBCAN_EVENT_CONNECT":     6,  # a new USB-CANmodul has been connected
-    "USBCAN_EVENT_DISCONNECT":  7,  # a USB-CANmodul has been disconnected
+    "USBCAN_EVENT_INITHW": 0,       # the USB-CANmodul has been initialized
+    "USBCAN_EVENT_INITCAN": 1,      # the CAN interface has been initialized
+    "USBCAN_EVENT_RECIEVE": 2,      # a new CAN message has been received (for compatibility reason)
+    "USBCAN_EVENT_RECEIVE": 2,      # a new CAN message has been received
+    "USBCAN_EVENT_STATUS": 3,       # the error state in the module has changed
+    "USBCAN_EVENT_DEINITCAN": 4,    # the CAN interface has been deinitialized (UcanDeinitCan() was called)
+    "USBCAN_EVENT_DEINITHW": 5,     # the USB-CANmodul has been deinitialized (UcanDeinitHardware() was called)
+    "USBCAN_EVENT_CONNECT": 6,      # a new USB-CANmodul has been connected
+    "USBCAN_EVENT_DISCONNECT": 7,   # a USB-CANmodul has been disconnected
     "USBCAN_EVENT_FATALDISCON": 8,  # a USB-CANmodul has been disconnected during operation
-    "USBCAN_EVENT_RESERVED1":   0x80
+    "USBCAN_EVENT_RESERVED1": 0x80
 }
 
 statusSystec = {
-    "USBCAN_CANERR_OK":                 0x0000,     # No error occurred.
-    "USBCAN_CANERR_XMTFULL":            0x0001,     # Transmit buffer in CAN controller is overrun.
-    "USBCAN_CANERR_OVERRUN":            0x0002,     # Receive buffer in CAN controller is overrun.
-    "USBCAN_CANERR_BUSLIGHT":           0x0004,     # Error limit 1 in CAN controller exceeded.The CAN controller is in state "Warning limit".
-    "USBCAN_CANERR_BUSHEAVY":           0x0008,     # Error limit 2 in CAN controller exceeded.The CAN controller is in state "Error Passive".
-    "USBCAN_CANERR_BUSOFF":             0x0010,     # CAN controller is in BUSOFF state.
-    "USBCAN_CANERR_QOVERRUN":           0x0040,     # Receive buffer in module’s firmware is overrun.
-    "USBCAN_CANERR_QXMTFULL":           0x0080,     # Transmit buffer in module’s firmware is overrun.
-    "USBCAN_CANERR_REGTEST":            0x0100,     # Obsolete
-    "USBCAN_CANERR_MEMTEST":            0x0200,     # Obsolete
-    "USBCAN_CANERR_TXMSGLOST":          0x0400,     # A transmit CAN message was deleted automatically by the firmware because transmission timeout
-    "USBCAN_USBERR_STATUS_TIMEOUT":     0x2000,     # The USB - CANmodul has been reset because the status channel was not polled each second.
-    "USBCAN_USBERR_WATCHDOG_TIMEOUT":   0x4000,     # The USB - CANmodul has been reset because the internal watchdog was not triggered by the firmware.
+    "USBCAN_CANERR_OK": 0x0000,                 # No error occurred.
+    "USBCAN_CANERR_XMTFULL": 0x0001,            # Transmit buffer in CAN controller is overrun.
+    "USBCAN_CANERR_OVERRUN": 0x0002,            # Receive buffer in CAN controller is overrun.
+    "USBCAN_CANERR_BUSLIGHT": 0x0004,           # Error limit 1 in CAN controller exceeded.The CAN controller is in state "Warning limit".
+    "USBCAN_CANERR_BUSHEAVY": 0x0008,           # Error limit 2 in CAN controller exceeded.The CAN controller is in state "Error Passive".
+    "USBCAN_CANERR_BUSOFF": 0x0010,             # CAN controller is in BUSOFF state.
+    "USBCAN_CANERR_QOVERRUN": 0x0040,           # Receive buffer in module’s firmware is overrun.
+    "USBCAN_CANERR_QXMTFULL": 0x0080,           # Transmit buffer in module’s firmware is overrun.
+    "USBCAN_CANERR_REGTEST": 0x0100,            # Obsolete
+    "USBCAN_CANERR_MEMTEST": 0x0200,            # Obsolete
+    "USBCAN_CANERR_TXMSGLOST": 0x0400,          # A transmit CAN message was deleted automatically by the firmware because transmission timeout
+    "USBCAN_USBERR_STATUS_TIMEOUT": 0x2000,     # The USB - CANmodul has been reset because the status channel was not polled each second.
+    "USBCAN_USBERR_WATCHDOG_TIMEOUT": 0x4000,   # The USB - CANmodul has been reset because the internal watchdog was not triggered by the firmware.
 }
 
 retSystec = {
-    "USBCAN_SUCCESSFUL":            0x00,
-    "USBCAN_ERR_RESOURCE":          0x01,
-    "USBCAN_ERR_MAXMODULES":        0x02,
-    "USBCAN_ERR_HWINUSE":           0x03,
-    "USBCAN_ERR_ILLVERSION":        0x04,
-    "USBCAN_ERR_ILLHW":             0x05,
-    "USBCAN_ERR_ILLHANDLE":         0x06,
-    "USBCAN_ERR_ILLPARAM":          0x07,
-    "USBCAN_ERR_BUSY":              0x08,
-    "USBCAN_ERR_TIMEOUT":           0x09,
-    "USBCAN_ERR_IOFAILED":          0x0a,
-    "USBCAN_ERR_DLL_TXFULL":        0x0b,
-    "USBCAN_ERR_MAXINSTANCES":      0x0c,
-    "USBCAN_ERR_CANNOTINIT":        0x0d,
-    "USBCAN_ERR_DISCONNECT":        0x0e,
-    "USBCAN_ERR_NOHWCLASS":         0x0f,
-    "USBCAN_ERR_ILLCHANNEL":        0x10,
-    "USBCAN_ERR_ILLHWTYPE":         0x12,
-    "USBCAN_ERRCMD_NOTEQU":         0x40,
-    "USBCAN_ERRCMD_REGTST":         0x41,
-    "USBCAN_ERRCMD_ILLCMD":         0x42,
-    "USBCAN_ERRCMD_EEPROM":         0x43,
-    "USBCAN_ERRCMD_ILLBDR":         0x47,
-    "USBCAN_ERRCMD_NOTINIT":        0x48,
-    "USBCAN_ERRCMD_ALREADYINIT":    0x49,
-    "USBCAN_ERRCMD_ILLSUBCMD":      0x4a,
-    "USBCAN_ERRCMD_ILLIDX":         0x4b,
-    "USBCAN_ERRCMD_RUNNING":        0x4c,
-    "USBCAN_WARN_NODATA":           0x80,
-    "USBCAN_WARN_SYS_RXOVERRUN":    0x81,
-    "USBCAN_WARN_DLL_RXOVERRUN":    0x82,
-    "USBCAN_WARN_FW_TXOVERRUN":     0x85,
-    "USBCAN_WARN_FW_RXOVERRUN":     0x86,
-    "USBCAN_WARN_NULL_PTR":         0x90,
-    "USBCAN_WARN_TXLIMIT":          0x91,
+    "USBCAN_SUCCESSFUL": 0x00,
+    "USBCAN_ERR_RESOURCE": 0x01,
+    "USBCAN_ERR_MAXMODULES": 0x02,
+    "USBCAN_ERR_HWINUSE": 0x03,
+    "USBCAN_ERR_ILLVERSION": 0x04,
+    "USBCAN_ERR_ILLHW": 0x05,
+    "USBCAN_ERR_ILLHANDLE": 0x06,
+    "USBCAN_ERR_ILLPARAM": 0x07,
+    "USBCAN_ERR_BUSY": 0x08,
+    "USBCAN_ERR_TIMEOUT": 0x09,
+    "USBCAN_ERR_IOFAILED": 0x0a,
+    "USBCAN_ERR_DLL_TXFULL": 0x0b,
+    "USBCAN_ERR_MAXINSTANCES": 0x0c,
+    "USBCAN_ERR_CANNOTINIT": 0x0d,
+    "USBCAN_ERR_DISCONNECT": 0x0e,
+    "USBCAN_ERR_NOHWCLASS": 0x0f,
+    "USBCAN_ERR_ILLCHANNEL": 0x10,
+    "USBCAN_ERR_ILLHWTYPE": 0x12,
+    "USBCAN_ERRCMD_NOTEQU": 0x40,
+    "USBCAN_ERRCMD_REGTST": 0x41,
+    "USBCAN_ERRCMD_ILLCMD": 0x42,
+    "USBCAN_ERRCMD_EEPROM": 0x43,
+    "USBCAN_ERRCMD_ILLBDR": 0x47,
+    "USBCAN_ERRCMD_NOTINIT": 0x48,
+    "USBCAN_ERRCMD_ALREADYINIT": 0x49,
+    "USBCAN_ERRCMD_ILLSUBCMD": 0x4a,
+    "USBCAN_ERRCMD_ILLIDX": 0x4b,
+    "USBCAN_ERRCMD_RUNNING": 0x4c,
+    "USBCAN_WARN_NODATA": 0x80,
+    "USBCAN_WARN_SYS_RXOVERRUN": 0x81,
+    "USBCAN_WARN_DLL_RXOVERRUN": 0x82,
+    "USBCAN_WARN_FW_TXOVERRUN": 0x85,
+    "USBCAN_WARN_FW_RXOVERRUN": 0x86,
+    "USBCAN_WARN_NULL_PTR": 0x90,
+    "USBCAN_WARN_TXLIMIT": 0x91,
 }
 
 
